@@ -59,13 +59,7 @@ public class ToolLeveling {
             CompoundTag toolExpData = toolExperience.serializeNBT();
             LOGGER.info("TOOLEXPDATA: " + toolExpData);
 
-            event.getToolTip().add(1, Component.translatable("tooltip.toolleveling.level",
-                    toolExpData.getInt("Level")));
-            event.getToolTip().add(2, Component.empty());
-            event.getToolTip().add(3, Component.literal(toolExperience.buildExpBar()));
-            event.getToolTip().add(4, Component.empty());
-            if (Screen.hasShiftDown())
-                event.getToolTip().add(5, Component.translatable("tooltip.toolleveling.experience", toolExpData.getInt("Experience"), toolExpData.getInt("NextLevelExperience")));
+            renderTooltip(event, toolExpData, toolExperience);
         }
     }
 
@@ -87,6 +81,7 @@ public class ToolLeveling {
                     if (leveledUp) {
                         ((Level) event.getLevel()).playSound(null, event.getPlayer().getX(), event.getPlayer().getY(), event.getPlayer().getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 1.5F);
                         event.getPlayer().sendSystemMessage(Component.translatable("chat.tooltip.levelup", toolExperience.serializeNBT().getInt("Level")));
+                        // The logic for increasing tool stats *should* go here...
                     }
                 }
             }
@@ -96,5 +91,15 @@ public class ToolLeveling {
     public static boolean isItemStackATool(ItemStack stack) {
         Item item = stack.getItem();
         return item instanceof DiggerItem;
+    }
+
+    public void renderTooltip(ItemTooltipEvent event, CompoundTag toolExpData, ToolExperience toolExperience) {
+        event.getToolTip().add(1, Component.translatable("tooltip.toolleveling.level",
+                toolExpData.getInt("Level")));
+        event.getToolTip().add(2, Component.empty());
+        event.getToolTip().add(3, Component.literal(toolExperience.buildExpBar()));
+        event.getToolTip().add(4, Component.empty());
+        if (Screen.hasShiftDown())
+            event.getToolTip().add(5, Component.translatable("tooltip.toolleveling.experience", toolExpData.getInt("Experience"), toolExpData.getInt("NextLevelExperience")));
     }
 }
