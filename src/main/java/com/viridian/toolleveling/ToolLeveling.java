@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -18,6 +19,7 @@ import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.slf4j.Logger;
@@ -39,6 +41,7 @@ public class ToolLeveling {
         modEventBus.addListener(this::commonSetup);
         LOGGER.info("TOOL_EXP INFO: " + TOOL_EXP);
         NeoForge.EVENT_BUS.addListener(this::onItemTooltipEvent);
+        NeoForge.EVENT_BUS.addListener(this::onBlockBreakEvent);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -59,8 +62,17 @@ public class ToolLeveling {
         }
     }
 
+    @SubscribeEvent
+    public void onBlockBreakEvent(BlockEvent.BreakEvent event) {
+        ItemStack tool = event.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
+        if (tool.getItem() instanceof DiggerItem && event.getPlayer().hasCorrectToolForDrops(event.getState())) {
+            LOGGER.info("PLAYER BROKE BLOCK WITH CORRECT TOOL");
 
+            ToolExperience toolExperience = tool.getData(TOOL_EXP);
 
+            toolExperience.addExperience(1);
+        }
+    }
 
     public static boolean isItemStackATool(ItemStack stack) {
         Item item = stack.getItem();
