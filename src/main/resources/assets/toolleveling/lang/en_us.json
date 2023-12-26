@@ -1,4 +1,5 @@
 {
   "tooltip.toolleveling.level": "§lLᴇᴠᴇʟ: %s",
-  "tooltip.toolleveling.experience": "§lExᴘ: %s / %s"
+  "tooltip.toolleveling.experience": "§lExᴘ: %s / %s",
+  "chat.tooltip.levelup": "§6§oYou seem to have grown more experienced with your tool."
 }

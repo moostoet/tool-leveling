@@ -58,11 +58,11 @@ public class ToolLeveling {
 
             event.getToolTip().add(1, Component.translatable("tooltip.toolleveling.level",
                     toolExpData.getInt("Level")));
-
-            event.getToolTip().add(2, Component.literal(toolExperience.buildExpBar()));
-
+            event.getToolTip().add(2, Component.empty());
+            event.getToolTip().add(3, Component.literal(toolExperience.buildExpBar()));
+            event.getToolTip().add(4, Component.empty());
             if (Screen.hasShiftDown())
-                event.getToolTip().add(3, Component.translatable("tooltip.toolleveling.experience", toolExpData.getInt("Experience"), toolExpData.getInt("NextLevelExperience")));
+                event.getToolTip().add(5, Component.translatable("tooltip.toolleveling.experience", toolExpData.getInt("Experience"), toolExpData.getInt("NextLevelExperience")));
         }
     }
 
@@ -80,6 +80,7 @@ public class ToolLeveling {
                     boolean leveledUp = toolExperience.addExperience(1);
                     if (leveledUp) {
                         ((Level) event.getLevel()).playSound(null, event.getPlayer().getX(), event.getPlayer().getY(), event.getPlayer().getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 1.5F);
+                        event.getPlayer().sendSystemMessage(Component.translatable("chat.tooltip.levelup", toolExperience.serializeNBT().getInt("Level")));
                     }
                 }
             }
