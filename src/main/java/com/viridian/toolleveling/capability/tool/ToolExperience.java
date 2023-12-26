@@ -6,12 +6,14 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 public class ToolExperience implements INBTSerializable<CompoundTag> {
     private int experience;
     private int level;
+    private int nextLevelExperience;
     private static final int BASE_XP = 15; // Base XP required for leveling up from level 1 to 2.
     private static final double XP_MULTIPLIER = 1.75; // Multiplier for each subsequent level.
 
     public ToolExperience() {
         this.experience = 0;
         this.level = 1;
+        this.nextLevelExperience = calculateNextLevelExperience(level);
     }
 
     @Override
@@ -29,10 +31,26 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
     }
 
     /**
-     * Calculates the total experience required to reach the next level.
-     * @return the experience required to level up
+     * Method to add experience and handle leveling up.
+     *
+     * @param additionalExp The additional experience to add.
+     * @return didLevelUp If the player leveled up.
      */
-    public int getExperienceForNextLevel() {
+    public boolean addExperience(int additionalExp) {
+        boolean didLevelUp = false;
+        experience += additionalExp;
+
+        while (experience >= nextLevelExperience) {
+            experience -= nextLevelExperience;
+            level++;
+            nextLevelExperience = calculateNextLevelExperience(level);
+            didLevelUp = true;
+        }
+
+        return didLevelUp;
+    }
+
+    private int calculateNextLevelExperience(int level) {
         if (level == 1) {
             return BASE_XP;
         } else {
@@ -40,16 +58,22 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
         }
     }
 
-    /**
-     * Method to add experience and handle leveling up.
-     * @param additionalExp The additional experience to add.
-     */
-    public void addExperience(int additionalExp) {
-        experience += additionalExp;
+    public int getNextLevelExperience() {
+        return nextLevelExperience;
+    }
 
-        while (experience >= getExperienceForNextLevel()) {
-            experience -= getExperienceForNextLevel();
-            level++;
+    public String buildExpBar() {
+        double experiencePercentage = (double) experience / getNextLevelExperience();
+        StringBuilder expBar = new StringBuilder("§f[");
+        for (int i = 1; i <= 10; i++) {
+            if ((experiencePercentage * 10) >= i) {
+                expBar.append("§6█");
+            } else {
+                expBar.append("§f█");
+            }
         }
+        expBar.append("§f]");
+
+        return expBar.toString();
     }
 }
