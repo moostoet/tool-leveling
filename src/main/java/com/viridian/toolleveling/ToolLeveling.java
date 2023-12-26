@@ -61,7 +61,8 @@ public class ToolLeveling {
 
             event.getToolTip().add(2, Component.literal(toolExperience.buildExpBar()));
 
-            if ( Screen.hasShiftDown()) event.getToolTip().add(3, Component.translatable("tooltip.toolleveling.experience", toolExpData.getInt("Experience"), toolExperience.getNextLevelExperience()));
+            if (Screen.hasShiftDown())
+                event.getToolTip().add(3, Component.translatable("tooltip.toolleveling.experience", toolExpData.getInt("Experience"), toolExpData.getInt("NextLevelExperience")));
         }
     }
 
@@ -78,12 +79,13 @@ public class ToolLeveling {
                 if (toolExperience != null) {
                     boolean leveledUp = toolExperience.addExperience(1);
                     if (leveledUp) {
-                        ((Level)event.getLevel()).playSound(null, event.getPlayer().getX(), event.getPlayer().getY(), event.getPlayer().getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS,1.0F, 1.5F);
+                        ((Level) event.getLevel()).playSound(null, event.getPlayer().getX(), event.getPlayer().getY(), event.getPlayer().getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 1.5F);
                     }
                 }
             }
         }
     }
+
     public static boolean isItemStackATool(ItemStack stack) {
         Item item = stack.getItem();
         return item instanceof DiggerItem;
