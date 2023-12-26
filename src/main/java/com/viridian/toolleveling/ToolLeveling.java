@@ -3,6 +3,8 @@ package com.viridian.toolleveling;
 
 import com.mojang.logging.LogUtils;
 import com.viridian.toolleveling.capability.tool.ToolExperience;
+import com.viridian.toolleveling.networking.TestMessage;
+import com.viridian.toolleveling.networking.ToolLevelingNetwork;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -37,6 +39,7 @@ public class ToolLeveling {
             "tool_experience", () -> AttachmentType.serializable(ToolExperience::new).build());
 
     public ToolLeveling(IEventBus modEventBus) {
+        ToolLevelingNetwork.registerMessages();
         LOGGER.info("Hello, world");
         ATTACHMENT_TYPES.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
@@ -69,6 +72,9 @@ public class ToolLeveling {
     @SubscribeEvent
     public void onBlockBreakEvent(BlockEvent.BreakEvent event) {
         ItemStack tool = event.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
+
+//        ToolLevelingNetwork.NETWORK.sendToServer(new TestMessage("BLOCK BROKEN"));
+
         if (tool.getItem() instanceof DiggerItem) {
             float hardness = event.getState().getDestroySpeed(event.getLevel(), event.getPos());
             boolean isCorrectTool = event.getPlayer().hasCorrectToolForDrops(event.getState());
