@@ -3,6 +3,8 @@ package com.viridian.toolleveling;
 
 import com.mojang.logging.LogUtils;
 import com.viridian.toolleveling.capability.tool.ToolExperience;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DiggerItem;
@@ -36,23 +38,11 @@ public class ToolLeveling {
         ATTACHMENT_TYPES.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         LOGGER.info("TOOL_EXP INFO: " + TOOL_EXP);
-        NeoForge.EVENT_BUS.addListener(this::onItemCraftedEvent);
         NeoForge.EVENT_BUS.addListener(this::onItemTooltipEvent);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("HELLO FROM COMMON SETUP");
-    }
-
-    @SubscribeEvent
-    public void onItemCraftedEvent(PlayerEvent.ItemCraftedEvent event) {
-        ItemStack craftedItemStack = event.getCrafting();
-        LOGGER.info("CRAFTED ITEM STACK IS: " + craftedItemStack);
-        if (isItemStackATool(craftedItemStack)) {
-            LOGGER.info("CRAFTED ITEM IS A TOOL");
-            ToolExperience toolExperience = craftedItemStack.getData(TOOL_EXP);
-            LOGGER.info("TOOL_EXP IS: " + toolExperience.serializeNBT());
-        }
     }
 
     @SubscribeEvent
