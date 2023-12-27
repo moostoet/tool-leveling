@@ -29,9 +29,7 @@ public class ItemStackMixin {
         ToolExperience toolExperience = stack.getData(TOOL_EXP);
 
         float miningSpeedModifier = toolExperience.getToolStats().getMiningSpeed();
-        currentDestroySpeed += miningSpeedModifier;
-
-        System.out.println("DESTROY SPEED IS: " + currentDestroySpeed);
+        if (currentDestroySpeed > 1.0f) currentDestroySpeed += miningSpeedModifier;
 
         return currentDestroySpeed;
     }
