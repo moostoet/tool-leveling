@@ -2,7 +2,12 @@ package com.viridian.toolleveling.capability.tool;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import org.slf4j.Logger;
 
 public class ToolExperience implements INBTSerializable<CompoundTag> {
@@ -84,5 +89,17 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
 
     public ToolStats getToolStats() {
         return toolStats;
+    }
+
+    public void checkLeveledUp(boolean hasLeveledUp, BlockEvent.BreakEvent event) {
+        if (hasLeveledUp) {
+            ((Level) event.getLevel()).playSound(null, event.getPlayer().getX(), event.getPlayer().getY(), event.getPlayer().getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 1.5F);
+            event.getPlayer().sendSystemMessage(Component.translatable("chat.tooltip.levelup", this.serializeNBT().getInt("Level")));
+            increaseToolStats();
+        }
+    }
+
+    public void increaseToolStats() {
+
     }
 }

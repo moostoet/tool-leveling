@@ -80,11 +80,7 @@ public class ToolLeveling {
                 ToolExperience toolExperience = tool.getData(TOOL_EXP);
                 if (toolExperience != null) {
                     boolean leveledUp = toolExperience.addExperience(1);
-                    if (leveledUp) {
-                        ((Level) event.getLevel()).playSound(null, event.getPlayer().getX(), event.getPlayer().getY(), event.getPlayer().getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 1.5F);
-                        event.getPlayer().sendSystemMessage(Component.translatable("chat.tooltip.levelup", toolExperience.serializeNBT().getInt("Level")));
-                        // The logic for increasing tool stats *should* go here...
-                    }
+                    toolExperience.checkLeveledUp(leveledUp, event);
                 }
             }
         }

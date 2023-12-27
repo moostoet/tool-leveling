@@ -29,7 +29,7 @@ public class ItemStackMixin {
         ToolExperience toolExperience = stack.getData(TOOL_EXP);
 
         float miningSpeedModifier = toolExperience.getToolStats().getMiningSpeed();
-        if (currentDestroySpeed > 1.0f) currentDestroySpeed += miningSpeedModifier;
+        if (currentDestroySpeed > 1.0f) currentDestroySpeed += miningSpeedModifier; // checks if block is not meant to be broken by tool given speed modifiers.
 
         return currentDestroySpeed;
     }
