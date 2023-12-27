@@ -1,6 +1,7 @@
 package com.viridian.toolleveling.attachment;
 
 import com.viridian.toolleveling.capability.tool.ToolExperience;
+import com.viridian.toolleveling.capability.tool.ToolStats;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;

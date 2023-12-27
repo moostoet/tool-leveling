@@ -23,7 +23,7 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
         this.experience = 0;
         this.level = 1;
         this.nextLevelExperience = calculateNextLevelExperience(level);
-        this.toolStats = new ToolStats(0.0f, 0, 0);
+        this.toolStats = new ToolStats();
     }
 
     @Override
@@ -32,6 +32,7 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
         nbt.putInt("Experience", experience);
         nbt.putInt("Level", level);
         nbt.putInt("NextLevelExperience", nextLevelExperience);
+        nbt.put("ToolStats", toolStats.serializeNBT());
         return nbt;
     }
 
@@ -40,6 +41,7 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
         this.experience = nbt.getInt("Experience");
         this.level = nbt.getInt("Level");
         this.nextLevelExperience = nbt.contains("NextLevelExperience") ? nbt.getInt("NextLevelExperience") : calculateNextLevelExperience(this.level);
+        this.toolStats.deserializeNBT(nbt.getCompound("ToolStats"));
     }
 
     /**
@@ -100,6 +102,8 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
     }
 
     public void increaseToolStats() {
-
+//        this.getToolStats().setMiningSpeed(this.getToolStats().getMiningSpeed() + 0.1f);
+        toolStats.setMiningSpeed(toolStats.getMiningSpeed() + 0.1f);
+        LOGGER.info("UPGRADED TOOLSTATS: " + this.getToolStats().serializeNBT().toString());
     }
 }

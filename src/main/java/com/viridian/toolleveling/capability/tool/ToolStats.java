@@ -8,10 +8,10 @@ public class ToolStats implements INBTSerializable<CompoundTag> {
     private int harvestLevel;
     private int fortuneLevel;
 
-    public ToolStats(float miningSpeed, int harvestLevel, int fortuneLevel) {
-        this.miningSpeed = miningSpeed;
-        this.harvestLevel = harvestLevel;
-        this.fortuneLevel = fortuneLevel;
+    public ToolStats() {
+        this.miningSpeed = 0.0f;
+        this.harvestLevel = 0;
+        this.fortuneLevel = 0;
     }
 
     public float getMiningSpeed() {

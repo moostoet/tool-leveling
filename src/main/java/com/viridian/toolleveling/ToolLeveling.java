@@ -57,9 +57,7 @@ public class ToolLeveling {
         if (isItemStackATool(event.getItemStack())) {
             ToolExperience toolExperience = event.getItemStack().getData(TOOL_EXP);
             CompoundTag toolExpData = toolExperience.serializeNBT();
-            CompoundTag toolStats = toolExperience.getToolStats().serializeNBT();
             LOGGER.info("TOOLEXPDATA: " + toolExpData);
-            LOGGER.info("TOOLSTATS: " + toolStats);
 
             renderTooltip(event, toolExpData, toolExperience);
         }
@@ -78,10 +76,8 @@ public class ToolLeveling {
             if (hardness > 0.2 && isCorrectTool) {
                 LOGGER.info("PLAYER BROKE BLOCK WITH CORRECT TOOL:" + event);
                 ToolExperience toolExperience = tool.getData(TOOL_EXP);
-                if (toolExperience != null) {
-                    boolean leveledUp = toolExperience.addExperience(1);
-                    toolExperience.checkLeveledUp(leveledUp, event);
-                }
+                boolean leveledUp = toolExperience.addExperience(1);
+                toolExperience.checkLeveledUp(leveledUp, event);
             }
         }
     }
