@@ -9,6 +9,7 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
     private int experience;
     private int level;
     private int nextLevelExperience;
+    private final ToolStats toolStats;
     private static final int BASE_XP = 15; // Base XP required for leveling up from level 1 to 2.
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final double XP_MULTIPLIER = 1.75; // Multiplier for each subsequent level.
@@ -17,6 +18,7 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
         this.experience = 0;
         this.level = 1;
         this.nextLevelExperience = calculateNextLevelExperience(level);
+        this.toolStats = new ToolStats(0.0f, 0, 0);
     }
 
     @Override
@@ -78,5 +80,9 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
         expBar.append("§f]");
 
         return expBar.toString();
+    }
+
+    public ToolStats getToolStats() {
+        return toolStats;
     }
 }

@@ -29,14 +29,14 @@ import org.slf4j.Logger;
 
 import java.util.function.Supplier;
 
+import static com.viridian.toolleveling.attachment.AttachmentTypes.ATTACHMENT_TYPES;
+import static com.viridian.toolleveling.attachment.AttachmentTypes.TOOL_EXP;
+
 @Mod(ToolLeveling.MODID)
 public class ToolLeveling {
 
     public static final String MODID = "toolleveling";
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, MODID);
-    private static final Supplier<AttachmentType<ToolExperience>> TOOL_EXP = ATTACHMENT_TYPES.register(
-            "tool_experience", () -> AttachmentType.serializable(ToolExperience::new).build());
 
     public ToolLeveling(IEventBus modEventBus) {
         ToolLevelingNetwork.registerMessages();
@@ -57,7 +57,9 @@ public class ToolLeveling {
         if (isItemStackATool(event.getItemStack())) {
             ToolExperience toolExperience = event.getItemStack().getData(TOOL_EXP);
             CompoundTag toolExpData = toolExperience.serializeNBT();
+            CompoundTag toolStats = toolExperience.getToolStats().serializeNBT();
             LOGGER.info("TOOLEXPDATA: " + toolExpData);
+            LOGGER.info("TOOLSTATS: " + toolStats);
 
             renderTooltip(event, toolExpData, toolExperience);
         }
