@@ -92,8 +92,18 @@ public class ToolLeveling {
                 toolExpData.getInt("Level")));
         event.getToolTip().add(2, Component.empty());
         event.getToolTip().add(3, Component.literal(toolExperience.buildExpBar()));
-        event.getToolTip().add(4, Component.empty());
-        if (Screen.hasShiftDown())
-            event.getToolTip().add(5, Component.translatable("tooltip.toolleveling.experience", toolExpData.getInt("Experience"), toolExpData.getInt("NextLevelExperience")));
+        CompoundTag stats = toolExpData.getCompound("ToolStats");
+        String formattedSpeed = "%.1f".formatted(stats.getFloat("MiningSpeed"));
+        if (Screen.hasShiftDown()) {
+            event.getToolTip().add(4, Component.translatable("tooltip.toolleveling.experience", toolExpData.getInt("Experience"), toolExpData.getInt("NextLevelExperience")));
+            event.getToolTip().add(5, Component.empty());
+            event.getToolTip().add(6, Component.translatable("tooltip.toolleveling.stats", formattedSpeed, stats.getInt("FortuneLevel"), stats.getInt("HarvestLevel")));
+        } else {
+            event.getToolTip().add(4, Component.empty());
+            Component tooltipPart1 = Component.translatable("tooltip.toolleveling.showmore.1");
+            Component tooltipPart2 = Component.translatable("tooltip.toolleveling.showmore.2");
+            Component c = tooltipPart1.copy().append(tooltipPart2);
+            event.getToolTip().add(5, c);
+        }
     }
 }

@@ -10,6 +10,8 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import org.slf4j.Logger;
 
+import java.util.Random;
+
 public class ToolExperience implements INBTSerializable<CompoundTag> {
     private int experience;
     private int level;
@@ -102,8 +104,14 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
     }
 
     public void increaseToolStats() {
-//        this.getToolStats().setMiningSpeed(this.getToolStats().getMiningSpeed() + 0.1f);
-        toolStats.setMiningSpeed(toolStats.getMiningSpeed() + 0.1f);
-        LOGGER.info("UPGRADED TOOLSTATS: " + this.getToolStats().serializeNBT().toString());
+        Random random = new Random();
+
+        int statToIncrease = random.nextInt(2);
+
+        switch (statToIncrease) {
+            case 0 -> toolStats.setMiningSpeed(toolStats.getMiningSpeed() + 0.1f);
+            case 1 -> toolStats.setFortuneLevel((toolStats.getFortuneLevel()) + 1);
+            default -> throw new IllegalStateException("Unexpected value: " + statToIncrease);
+        }
     }
 }
