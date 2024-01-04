@@ -5,12 +5,10 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 
 public class ToolStats implements INBTSerializable<CompoundTag> {
     private float miningSpeed;
-    private int harvestLevel;
     private int fortuneLevel;
 
     public ToolStats() {
         this.miningSpeed = 0.0f;
-        this.harvestLevel = 0;
         this.fortuneLevel = 0;
     }
 
@@ -20,14 +18,6 @@ public class ToolStats implements INBTSerializable<CompoundTag> {
 
     public void setMiningSpeed(float miningSpeed) {
         this.miningSpeed = miningSpeed;
-    }
-
-    public int getHarvestLevel() {
-        return harvestLevel;
-    }
-
-    public void setHarvestLevel(int harvestLevel) {
-        this.harvestLevel = harvestLevel;
     }
 
     public int getFortuneLevel() {
@@ -42,7 +32,6 @@ public class ToolStats implements INBTSerializable<CompoundTag> {
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
         nbt.putFloat("MiningSpeed", miningSpeed);
-        nbt.putInt("HarvestLevel", harvestLevel);
         nbt.putInt("FortuneLevel", fortuneLevel);
         return nbt;
     }
@@ -50,7 +39,6 @@ public class ToolStats implements INBTSerializable<CompoundTag> {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         this.miningSpeed = nbt.getFloat("MiningSpeed");
-        this.harvestLevel = nbt.getInt("HarvestLevel");
         this.fortuneLevel = nbt.getInt("FortuneLevel");
     }
 }

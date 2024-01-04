@@ -11,12 +11,13 @@ import net.neoforged.neoforge.event.level.BlockEvent;
 import org.slf4j.Logger;
 
 import java.util.Random;
-
 public class ToolExperience implements INBTSerializable<CompoundTag> {
     private int experience;
     private int level;
     private int nextLevelExperience;
     private final ToolStats toolStats;
+    private final ToolAbilities toolAbilities;
+
     private static final int BASE_XP = 15; // Base XP required for leveling up from level 1 to 2.
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final double XP_MULTIPLIER = 1.75; // Multiplier for each subsequent level.
@@ -26,6 +27,7 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
         this.level = 1;
         this.nextLevelExperience = calculateNextLevelExperience(level);
         this.toolStats = new ToolStats();
+        this.toolAbilities = new ToolAbilities();
     }
 
     @Override
@@ -35,6 +37,7 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
         nbt.putInt("Level", level);
         nbt.putInt("NextLevelExperience", nextLevelExperience);
         nbt.put("ToolStats", toolStats.serializeNBT());
+        nbt.put("ToolAbilities", toolAbilities.serializeNBT());
         return nbt;
     }
 
@@ -44,6 +47,7 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
         this.level = nbt.getInt("Level");
         this.nextLevelExperience = nbt.contains("NextLevelExperience") ? nbt.getInt("NextLevelExperience") : calculateNextLevelExperience(this.level);
         this.toolStats.deserializeNBT(nbt.getCompound("ToolStats"));
+        this.toolAbilities.deserializeNBT(nbt.getCompound("ToolAbilities"));
     }
 
     /**
@@ -94,6 +98,8 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
     public ToolStats getToolStats() {
         return toolStats;
     }
+
+    public ToolAbilities getToolAbilities() { return toolAbilities; }
 
     public void checkLeveledUp(boolean hasLeveledUp, BlockEvent.BreakEvent event) {
         if (hasLeveledUp) {
