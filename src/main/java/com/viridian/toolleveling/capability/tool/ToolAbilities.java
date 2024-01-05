@@ -1,13 +1,14 @@
 package com.viridian.toolleveling.capability.tool;
 
+import com.mojang.datafixers.util.Either;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -24,9 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.viridian.toolleveling.attachment.AttachmentTypes.TOOL_EXP;
 
 public class ToolAbilities {
     private static final Logger LOGGER = LoggerFactory.getLogger(ToolAbilities.class);
@@ -75,26 +74,22 @@ public class ToolAbilities {
         }
     }
 
-    public void applyAbilitiesOnBlockBreak(BlockEvent.BreakEvent event) {
-        LOGGER.info(event.toString());
-    }
-
-    public void renderToolTips(ItemTooltipEvent event) {
+    public void renderToolTips(RenderTooltipEvent.GatherComponents event) {
         if (!abilities.isEmpty()) {
-            int index = 6;
-            event.getToolTip().add(index, Component.empty());
+            int index = 5;
+            event.getTooltipElements().add(index, Either.left(Component.empty()));
             for (ToolAbility ability : abilities) {
                 index++;
-                event.getToolTip().add(index, ability.getDisplayComponent());
+                event.getTooltipElements().add(index, Either.left(ability.getDisplayComponent()));
             }
         }
     }
 
-    public void handleRightClickAbilities(PlayerInteractEvent.RightClickBlock event) {
+    public void handleRightClickAbilities(PlayerInteractEvent.RightClickItem event) {
         if (this.hasAbility(ToolAbility.MAGMA_ABSORPTION)) handleMagmaAbsorptionAbility(event);
     }
 
-    public void handleMagmaAbsorptionAbility(PlayerInteractEvent.RightClickBlock event) {
+    private void handleMagmaAbsorptionAbility(PlayerInteractEvent.RightClickItem event) {
         Level level = event.getLevel();
         Player player = event.getEntity();
         BlockPos pos = event.getPos();
@@ -108,12 +103,24 @@ public class ToolAbilities {
 
             level.setBlock(result.getBlockPos(), Blocks.AIR.defaultBlockState(), 11);
 
+            spawnMagmaParticles(level, result.getBlockPos());
+
             ItemStack obsidian = new ItemStack(Blocks.OBSIDIAN);
             if (!player.getInventory().add(obsidian)) {
                 player.drop(obsidian, false);
             }
 
             level.playSound(null, pos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
+    }
+
+    private void spawnMagmaParticles(Level level, BlockPos pos) {
+        for (int i = 0; i < 20; ++i) {
+            double d0 = pos.getX() + level.random.nextDouble();
+            double d1 = pos.getY() + 1;
+            double d2 = pos.getZ() + level.random.nextDouble();
+            level.addParticle(ParticleTypes.SMOKE, d0, d1, d2, 0, 0.1, 0);
+            level.addParticle(ParticleTypes.FLAME, d0, d1, d2, 0, 0.1, 0);
         }
     }
 }

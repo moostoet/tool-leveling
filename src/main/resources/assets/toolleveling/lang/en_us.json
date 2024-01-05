@@ -4,5 +4,8 @@
   "tooltip.toolleveling.showmore.1": "§7§oHold §l§6[Shift]",
   "tooltip.toolleveling.showmore.2": "§7§o for more details.",
   "tooltip.toolleveling.stats": "【§l\uD83D\uDDF2 %s | ⟡ %s 】",
-  "chat.tooltip.levelup": "§6§oYou seem to have grown more experienced with your tool."
+  "chat.tooltip.levelup": "§6§oYou seem to have grown more experienced with your tool.",
+  "command.addability.no_item": "Your main hand needs to have a tool to add an ability to.",
+  "command.addability.success": "Successfully applied ability to tool.",
+  "command.addability.invalid": "Could not apply ability."
 }

@@ -1,4 +1,4 @@
-package com.viridian.toolleveling.render;
+package com.viridian.toolleveling.render.xp;
 
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 

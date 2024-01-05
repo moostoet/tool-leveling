@@ -72,6 +72,10 @@ public class ToolExperience implements INBTSerializable<CompoundTag> {
         return didLevelUp;
     }
 
+    public double getExperiencePercentage() {
+        return (double) experience / calculateNextLevelExperience(this.level);
+    }
+
     public int calculateNextLevelExperience(int level) {
         if (level == 1) {
             return BASE_XP;
