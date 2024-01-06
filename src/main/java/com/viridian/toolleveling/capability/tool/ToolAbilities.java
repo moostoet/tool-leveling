@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -39,7 +40,7 @@ import java.util.Set;
 
 import static com.viridian.toolleveling.ToolLeveling.HIGHLIGHT_ENTITY;
 
-public class ToolAbilities {
+public class ToolAbilities implements INBTSerializable<CompoundTag> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ToolAbilities.class);
     private final Set<ToolAbility> abilities;
 
@@ -79,6 +80,7 @@ public class ToolAbilities {
         return abilities;
     }
 
+    @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         ListTag abilitiesList = new ListTag();
@@ -86,9 +88,17 @@ public class ToolAbilities {
             abilitiesList.add(StringTag.valueOf(ability.name()));
         }
         tag.put("Abilities", abilitiesList);
+
+        CompoundTag cooldownsTag = new CompoundTag();
+        for (ToolAbility ability : lastAbilityUseTime.keySet()) {
+            cooldownsTag.putLong(ability.name(), lastAbilityUseTime.getLong(ability));
+        }
+        tag.put("Cooldowns", cooldownsTag);
+
         return tag;
     }
 
+    @Override
     public void deserializeNBT(CompoundTag tag) {
         ListTag abilitiesList = tag.getList("Abilities", StringTag.TAG_STRING);
         this.abilities.clear();
@@ -98,6 +108,15 @@ public class ToolAbilities {
                 abilities.add(ToolAbility.valueOf(name));
             } catch (IllegalArgumentException e) {
                 LOGGER.warn("Unknown ability '{}' found in NBT data, it will be ignored.", name);
+            }
+        }
+
+        if (tag.contains("Cooldowns", CompoundTag.TAG_COMPOUND)) {
+            CompoundTag cooldownsTag = tag.getCompound("Cooldowns");
+            for (ToolAbility ability : abilityCooldowns.keySet()) {
+                if (cooldownsTag.contains(ability.name())) {
+                    lastAbilityUseTime.put(ability, cooldownsTag.getLong(ability.name()));
+                }
             }
         }
     }
