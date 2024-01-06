@@ -12,6 +12,7 @@ import com.viridian.toolleveling.capability.tool.ToolExperience;
 import com.viridian.toolleveling.entities.HighlightEntity;
 import com.viridian.toolleveling.entities.HighlightEntityRenderer;
 import com.viridian.toolleveling.entities.HighlightModel;
+import com.viridian.toolleveling.entities.color.ColorMapping;
 import com.viridian.toolleveling.networking.ToolLevelingNetwork;
 import com.viridian.toolleveling.render.xp.ClientXPBarTooltipComponent;
 import com.viridian.toolleveling.render.xp.XPBarTooltipComponent;
@@ -24,6 +25,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -44,6 +47,7 @@ import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -79,6 +83,7 @@ public class ToolLeveling {
 
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommandsEvent);
         NeoForge.EVENT_BUS.addListener(this::onRenderToolTipEvent);
+//        NeoForge.EVENT_BUS.addListener(this::onTickEvent);
         NeoForge.EVENT_BUS.addListener(this::onBlockBreakEvent);
         NeoForge.EVENT_BUS.addListener(this::onPlayerInteractRightClickItem);
         NeoForge.EVENT_BUS.addListener(this::onRightClickBlock);
@@ -159,6 +164,11 @@ public class ToolLeveling {
         );
     }
 
+//    @SubscribeEvent
+//    public void onTickEvent(TickEvent.ServerTickEvent e) {
+//        LOGGER.info("server tick...");
+//    }
+
     @SubscribeEvent
     public void onBlockBreakEvent(BlockEvent.BreakEvent event) {
         ItemStack tool = event.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
@@ -182,37 +192,18 @@ public class ToolLeveling {
     public void onPlayerInteractRightClickItem(PlayerInteractEvent.RightClickItem event) {
         ToolExperience tool = event.getEntity().getItemInHand(InteractionHand.MAIN_HAND).getData(TOOL_EXP);
 
-        tool.getToolAbilities().handleRightClickAbilities(event);
+        tool.getToolAbilities().handleRightClickItemAbilities(event);
     }
 
     @SubscribeEvent
     public void onRightClickBlock(PlayerInteractEvent.RightClickBlock e) {
-        Level level = e.getLevel();
         Player player = e.getEntity();
         ItemStack heldItem = player.getMainHandItem();
 
+        ToolExperience tool = e.getEntity().getItemInHand(InteractionHand.MAIN_HAND).getData(TOOL_EXP);
+
         if (heldItem.getItem() instanceof PickaxeItem) {
-            BlockPos pos = e.getPos();
-            highlightNearbyOres(level, pos, player);
-        }
-    }
-
-    public static void highlightNearbyOres(Level level, BlockPos center, Player player) {
-        int range = 16;
-
-        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-range, -range, -range), center.offset(range, range, range))) {
-            BlockState bState = level.getBlockState(pos);
-            if (bState.is(Tags.Blocks.ORES)) {
-                if (!level.isClientSide) {
-                    EntityType<HighlightEntity> highlightEntityType = HIGHLIGHT_ENTITY.get();
-
-                    HighlightEntity highlightEntity = highlightEntityType.create(level);
-
-                    highlightEntity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-
-                    level.addFreshEntity(highlightEntity);
-                }
-            }
+            tool.getToolAbilities().handleRightClickBlockAbilities(e);
         }
     }
 
