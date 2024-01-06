@@ -9,30 +9,45 @@ import com.mojang.logging.LogUtils;
 import com.viridian.toolleveling.capability.tool.ToolAbilities;
 import com.viridian.toolleveling.capability.tool.ToolAbility;
 import com.viridian.toolleveling.capability.tool.ToolExperience;
+import com.viridian.toolleveling.entities.HighlightEntity;
+import com.viridian.toolleveling.entities.HighlightEntityRenderer;
+import com.viridian.toolleveling.entities.HighlightModel;
 import com.viridian.toolleveling.networking.ToolLevelingNetwork;
 import com.viridian.toolleveling.render.xp.ClientXPBarTooltipComponent;
 import com.viridian.toolleveling.render.xp.XPBarTooltipComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 
 import static com.viridian.toolleveling.attachment.AttachmentTypes.ATTACHMENT_TYPES;
@@ -44,15 +59,29 @@ public class ToolLeveling {
     public static final String MODID = "toolleveling";
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<HighlightEntity>> HIGHLIGHT_ENTITY = ENTITY_TYPES.register("highlight_entity",
+            () -> EntityType.Builder.of(HighlightEntity::new, MobCategory.MISC)
+                    .sized(1, 1)
+                    .noSummon()
+                    .build("highlight_entity"));
+
     public ToolLeveling(IEventBus modEventBus) {
         ToolLevelingNetwork.registerMessages();
         ATTACHMENT_TYPES.register(modEventBus);
+        ENTITY_TYPES.register(modEventBus);
+
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::onRegisterTooltipComponent);
+        modEventBus.addListener(this::onRegisterRenderers);
+        modEventBus.addListener(this::onRegisterLayerDefinitions);
+
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommandsEvent);
         NeoForge.EVENT_BUS.addListener(this::onRenderToolTipEvent);
         NeoForge.EVENT_BUS.addListener(this::onBlockBreakEvent);
         NeoForge.EVENT_BUS.addListener(this::onPlayerInteractRightClickItem);
+        NeoForge.EVENT_BUS.addListener(this::onRightClickBlock);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -63,6 +92,14 @@ public class ToolLeveling {
     public void onRegisterTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {
         LOGGER.info("registering tooltip...");
         event.register(XPBarTooltipComponent.class, ClientXPBarTooltipComponent::new);
+    }
+
+    public void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers e) {
+        e.registerEntityRenderer(HIGHLIGHT_ENTITY.get(), HighlightEntityRenderer::new);
+    }
+
+    public void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions e) {
+        e.registerLayerDefinition(HighlightModel.LAYER_LOCATION, HighlightModel::createLayer);
     }
 
     @SubscribeEvent
@@ -134,7 +171,6 @@ public class ToolLeveling {
             boolean isCorrectTool = event.getPlayer().hasCorrectToolForDrops(event.getState());
 
             if (hardness > 0.2 && isCorrectTool) {
-                LOGGER.info("PLAYER BROKE BLOCK WITH CORRECT TOOL:" + event);
                 ToolExperience toolExperience = tool.getData(TOOL_EXP);
                 boolean leveledUp = toolExperience.addExperience(1);
                 toolExperience.checkLeveledUp(leveledUp, event);
@@ -147,6 +183,37 @@ public class ToolLeveling {
         ToolExperience tool = event.getEntity().getItemInHand(InteractionHand.MAIN_HAND).getData(TOOL_EXP);
 
         tool.getToolAbilities().handleRightClickAbilities(event);
+    }
+
+    @SubscribeEvent
+    public void onRightClickBlock(PlayerInteractEvent.RightClickBlock e) {
+        Level level = e.getLevel();
+        Player player = e.getEntity();
+        ItemStack heldItem = player.getMainHandItem();
+
+        if (heldItem.getItem() instanceof PickaxeItem) {
+            BlockPos pos = e.getPos();
+            highlightNearbyOres(level, pos, player);
+        }
+    }
+
+    public static void highlightNearbyOres(Level level, BlockPos center, Player player) {
+        int range = 16;
+
+        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-range, -range, -range), center.offset(range, range, range))) {
+            BlockState bState = level.getBlockState(pos);
+            if (bState.is(Tags.Blocks.ORES)) {
+                if (!level.isClientSide) {
+                    EntityType<HighlightEntity> highlightEntityType = HIGHLIGHT_ENTITY.get();
+
+                    HighlightEntity highlightEntity = highlightEntityType.create(level);
+
+                    highlightEntity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+
+                    level.addFreshEntity(highlightEntity);
+                }
+            }
+        }
     }
 
     public static boolean isItemStackATool(ItemStack stack) {
