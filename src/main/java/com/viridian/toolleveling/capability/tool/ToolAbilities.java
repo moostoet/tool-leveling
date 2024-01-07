@@ -33,10 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.tools.Tool;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.viridian.toolleveling.ToolLeveling.HIGHLIGHT_ENTITY;
 
@@ -167,6 +164,8 @@ public class ToolAbilities implements INBTSerializable<CompoundTag> {
                     if (color != null) {
                         highlightEntity.getEntityData().set(HighlightEntity.getPersistentColor(), color);
                     }
+
+                    highlightEntity.getEntityData().set(HighlightEntity.getPlayerUuid(), Optional.of(event.getEntity().getUUID()));
 
                     highlightEntity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
                     level.addFreshEntity(highlightEntity);

@@ -14,6 +14,8 @@ import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import org.slf4j.Logger;
 
+import java.util.Optional;
+
 public class HighlightEntityRenderer extends EntityRenderer {
     HighlightModel model;
 
@@ -37,7 +39,11 @@ public class HighlightEntityRenderer extends EntityRenderer {
         int b = FastColor.ARGB32.blue(color);
         int a = FastColor.ARGB32.alpha(color);
 
-        Minecraft.getInstance().renderBuffers().outlineBufferSource().setColor(r, g, b, a);
+        Minecraft minecraft = Minecraft.getInstance();
+
+        if (!entity.getEntityData().get(HighlightEntity.getPlayerUuid()).equals(Optional.of(minecraft.player.getUUID()))) return;
+
+        minecraft.renderBuffers().outlineBufferSource().setColor(r, g, b, a);
 
         VertexConsumer outline = Minecraft.getInstance().renderBuffers().outlineBufferSource().getBuffer(RenderType.outline(getTextureLocation(entity)));
 
