@@ -75,8 +75,13 @@ public class HighlightEntity extends Entity {
         }
     }
 
+//    @Override
+//    public boolean hasCustomOutlineRendering(Player player) {
+//        return getPlayerUUID().isPresent() && getPlayerUUID().get().equals(player.getUUID());
+//    }
+
     @Override
-    public boolean hasCustomOutlineRendering(Player player) {
-        return getPlayerUUID().isPresent() && getPlayerUUID().get().equals(player.getUUID());
+    public boolean isCurrentlyGlowing() {
+        return true;
     }
 }
