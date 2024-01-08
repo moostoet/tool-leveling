@@ -165,6 +165,7 @@ public class ToolAbilities implements INBTSerializable<CompoundTag> {
                         highlightEntity.getEntityData().set(HighlightEntity.getPersistentColor(), color);
                     }
 
+                    highlightEntity.getEntityData().set(HighlightEntity.getTtl(), 60);
                     highlightEntity.getEntityData().set(HighlightEntity.getPlayerUuid(), Optional.of(event.getEntity().getUUID()));
 
                     highlightEntity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
